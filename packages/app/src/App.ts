@@ -32,7 +32,7 @@ import {
 } from '@cloud-carbon-footprint/ali'
 import { OnPremise } from '@cloud-carbon-footprint/on-premise'
 
-import cache from './Cache'
+import {cache} from './Cache'
 import { EstimationRequest, RecommendationRequest } from './CreateValidRequest'
 import { includeCloudProviders } from './common/helpers'
 
@@ -120,6 +120,9 @@ export default class App {
         grouping,
         accounts,
       )
+      // appLogger.info(`here are the estimations:
+      // ${JSON.stringify(estimates, null, 2)}
+      // `)
       AzureEstimatesByRegion.push(estimates)
       appLogger.info('Finished Azure Estimations')
     }

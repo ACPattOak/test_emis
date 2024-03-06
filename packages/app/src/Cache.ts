@@ -21,7 +21,7 @@ import { concat, fillDates, filterCachedEstimates } from './common/helpers'
  function passes itself into the cache() as @descriptor. The cache() function
  then combines and returns data from the cache and decorated function.
  */
-export default function cache(): any {
+export function cache(): any {
   const cacheManagerServices: { [key: string]: CacheManager } = {
     GCS: new GoogleCloudCacheManager(),
     LOCAL: new LocalCacheManager(),
@@ -57,7 +57,7 @@ export default function cache(): any {
 
       // Determine if cache is ignored and get fresh estimates
       // TODO: Refactor this so cache isn't aware of test environment
-      if (request.ignoreCache && !process.env.TEST_MODE) {
+      if (true/*request.ignoreCache && !process.env.TEST_MODE*/) {
         cacheLogger.info('Ignoring cache...')
         return await getEstimatesForMissingDates(
           getCostAndEstimates,
