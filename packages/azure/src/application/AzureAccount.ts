@@ -238,6 +238,7 @@ export default class AzureAccount extends CloudProviderAccount {
     endDate: Date,
     grouping: GroupBy,
   ): (() => Promise<EstimationResult[]>)[] {
+    this.logger.info(`Getting data for All subscriptions you can access...`)
     return subscriptions.map((subscription) => {
       return async () => {
         try {

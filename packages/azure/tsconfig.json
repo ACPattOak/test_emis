@@ -3,7 +3,9 @@
   "compilerOptions": {
     "rootDir": "./src",
     "baseUrl": ".",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "experimentalDecorators": true
+
   },
   "include": ["./src"]
 }
