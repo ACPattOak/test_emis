@@ -7,6 +7,7 @@ import {
   Subscription,
 } from '@azure/arm-resources-subscriptions'
 import {
+  TokenCredential,
   ClientCertificateCredential,
   ClientSecretCredential,
   WorkloadIdentityCredential,
@@ -43,6 +44,7 @@ export default class AzureAccount extends CloudProviderAccount {
     | ClientCertificateCredential
     | ClientSecretCredential
     | WorkloadIdentityCredential
+    | TokenCredential
   private subscriptionClient: SubscriptionClient
   private logger: Logger
 

@@ -56,6 +56,7 @@ export interface CCFConfig {
       clientSecret?: string
       certificatePath?: string
       tenantId?: string
+      accessToken?: string
     }
     RESOURCE_TAG_NAMES?: string[]
     CONSUMPTION_CHUNKS_DAYS?: number
@@ -265,6 +266,8 @@ const getConfig = (): CCFConfig => ({
       clientSecret: getEnvVar('AZURE_CLIENT_SECRET') || '',
       certificatePath: getEnvVar('AZURE_CERTIFICATE_PATH') || '',
       tenantId: getEnvVar('AZURE_TENANT_ID') || '',
+      accessToken: getEnvVar('AZURE_ACCESS_TOKEN') || '',
+
     },
     RESOURCE_TAG_NAMES: JSON.parse(getAzureResourceTagNames()),
     CONSUMPTION_CHUNKS_DAYS: parseInt(
