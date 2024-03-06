@@ -82,6 +82,9 @@ import {
 } from '../domain'
 import { AZURE_MAPPED_REGIONS_TO_ELECTRICITY_MAPS_ZONES } from './AzureRegions'
 
+const fs = require('fs').promises;
+const path = require('path');
+
 export default class ConsumptionManagementService {
   private readonly consumptionManagementLogger: Logger
   private readonly consumptionManagementRateLimitRemainingHeader: string
@@ -104,12 +107,50 @@ export default class ConsumptionManagementService {
       'x-ms-ratelimit-microsoft.consumption-tenant-retry-after'
   }
 
+  public async cacheUsageRows(usageRows, startDate, endDate, subscriptionId) {
+    // Create a filename that incorporates startDate, endDate, and subscriptionId
+    const fileName = `usageRowsCache_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}_${subscriptionId}.json`;
+    const filePath = path.join(__dirname, fileName);
+  
+    try {
+      await fs.writeFile(filePath, JSON.stringify(usageRows, null, 2), 'utf8');
+      console.log('Data cached successfully.');
+    } catch (error) {
+      console.error('Error caching data:', error);
+    }
+  }
+  
+  public async getUsageRowsFromCache(startDate, endDate, subscriptionId) {
+    const fileName = `usageRowsCache_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}_${subscriptionId}.json`;
+    const filePath = path.join(__dirname, fileName);
+  
+    try {
+      const data = await fs.readFile(filePath, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      // If the file does not exist or there is any other error, assume the cache is invalid
+      console.error('Cache is invalid or error reading data from cache:', filePath);
+      return null;
+    }
+  }
+
   public async getEstimates(
     startDate: Date,
     endDate: Date,
     grouping: GroupBy,
   ): Promise<EstimationResult[]> {
-    const usageRows = await this.getConsumptionUsageDetails(startDate, endDate)
+    let usageRows = await this.getUsageRowsFromCache(startDate, endDate, this.consumptionManagementClient.subscriptionId);
+
+    if (!usageRows) {
+      usageRows = await this.getConsumptionUsageDetails(startDate, endDate);
+      await this.cacheUsageRows(usageRows, startDate, endDate, this.consumptionManagementClient.subscriptionId);
+    }
+    // this bit logs all the usage data.
+    // this.consumptionManagementLogger.debug(
+    //   `usage info looks like:
+    //   ${JSON.stringify(usageRows, null, 2)}
+    //   `,
+    // )
     const results: MutableEstimationResult[] = []
     const unknownRows: ConsumptionDetailRow[] = []
 
@@ -386,7 +427,7 @@ export default class ConsumptionManagementService {
     if (!AZURE.CONSUMPTION_CHUNKS_DAYS) {
       return await this.queryConsumptionUsageDetails(startDate, endDate)
     }
-
+    // Retrieve data in chunks.
     this.consumptionManagementLogger.info(
       `Time range will be requested in chunks of ${AZURE.CONSUMPTION_CHUNKS_DAYS} days`,
     )
