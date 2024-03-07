@@ -108,24 +108,39 @@ const getConsumptionDetails = (usageDetail: UsageDetailResult) => {
     usageAmount: usageDetail.quantity,
     region: usageDetail.resourceLocation,
   }
+  const consumptionDetailRowlogger = new Logger('ConsumptionDetailRow')
 
   if (usageDetail.kind === 'modern') {
-    return {
-      ...consumptionDetails,
-      accountId: usageDetail.subscriptionGuid,
-      usageType: usageDetail.meterName,
-      usageUnit: usageDetail.unitOfMeasure,
-      serviceName: usageDetail.meterCategory,
-      cost: usageDetail.costInUSD,
+    try {
+      const details = {
+        ...consumptionDetails,
+        accountId: usageDetail.subscriptionGuid,
+        usageType: usageDetail.meterName,
+        usageUnit: usageDetail.unitOfMeasure,
+        serviceName: usageDetail.meterCategory,
+        cost: usageDetail.costInUSD,
+      };
+      return details
+    } catch (e) {
+      consumptionDetailRowlogger.error("Getting consumption details for modern row failed: ", e);
+      return null
     }
-  } else {
-    return {
-      ...consumptionDetails,
-      accountId: usageDetail.id,
-      usageType: usageDetail.meterDetails.meterName,
-      usageUnit: usageDetail.meterDetails.unitOfMeasure,
-      serviceName: usageDetail.meterDetails.meterCategory,
-      cost: usageDetail.cost,
+  } 
+  else {
+    try {
+      const details = {
+        ...consumptionDetails,
+        accountId: usageDetail.id,
+        usageType: usageDetail.meterDetails.meterName,
+        usageUnit: usageDetail.meterDetails.unitOfMeasure,
+        serviceName: usageDetail.meterDetails.meterCategory,
+        cost: usageDetail.cost,
+      };
+      return details
+    } catch (e) {
+      consumptionDetailRowlogger.error("Getting consumption details for row failed: ", e);
+      return null
+
     }
   }
 }
