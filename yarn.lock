@@ -2633,7 +2633,7 @@ __metadata:
     eslint-plugin-unused-imports: ^2.0.0
     express: ^4.17.1
     helmet: ^5.0.1
-    immer: ^9.0.2
+    immer: ^10.0.3
     jest: ^27.4.7
     json-server: ^0.17.0
     lint-staged: ^12.1.7
@@ -13601,7 +13601,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^9.0.2, immer@npm:^9.0.7":
+"immer@npm:^10.0.3":
+  version: 10.0.3
+  resolution: "immer@npm:10.0.3"
+  checksum: 76acabe6f40e752028313762ba477a5d901e57b669f3b8fb406b87b9bb9b14e663a6fbbf5a6d1ab323737dd38f4b2494a4e28002045b88948da8dbf482309f28
+  languageName: node
+  linkType: hard
+
+"immer@npm:^9.0.7":
   version: 9.0.15
   resolution: "immer@npm:9.0.15"
   checksum: 92e3d63e810e3c3c2bb61b70c45443e37ef983ad12924e3edaf03725ae5979618f5b473439bb3bb4a8c4769f25132f18dec10ea15c40f0b20da5691ff96ff611
