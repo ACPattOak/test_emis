@@ -27,15 +27,15 @@ __metadata:
   linkType: hard
 
 "@alicloud/bssopenapi20171214@npm:^1.0.14":
-  version: 1.0.14
-  resolution: "@alicloud/bssopenapi20171214@npm:1.0.14"
+  version: 1.2.1
+  resolution: "@alicloud/bssopenapi20171214@npm:1.2.1"
   dependencies:
     "@alicloud/endpoint-util": ^0.0.1
     "@alicloud/openapi-client": ^0.4.4
-    "@alicloud/openapi-util": ^0.3.1
+    "@alicloud/openapi-util": ^0.3.2
     "@alicloud/tea-typescript": ^1.7.1
-    "@alicloud/tea-util": ^1.4.5
-  checksum: 42c7b4142d2d201fe4b92630a744db435237afdee923a1a3155c0199906f249e1551580eba72b313af1fed5f84618c928a75996ad2e68a08320cdded78596a76
+    "@alicloud/tea-util": ^1.4.7
+  checksum: b945e8d723882e636b9fa89b4358197715df55b157e2ddb257a245169aa888020910e1feb4e28a5a90753f3ee8e0bbe627a05375f2d0f4f96f4769275e5a62c7
   languageName: node
   linkType: hard
 
@@ -97,6 +97,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@alicloud/openapi-util@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "@alicloud/openapi-util@npm:0.3.2"
+  dependencies:
+    "@alicloud/tea-typescript": ^1.7.1
+    "@alicloud/tea-util": ^1.3.0
+    kitx: ^2.1.0
+    sm3: ^1.0.3
+  checksum: c94fa95750ac27a42d40646f78860581a06d7b1cf4b48d9e4a1bf543c83506df82f045ba703e7f295ae247ea024ddbc6694c9f38f2af857cf6572e5cad3e9f2e
+  languageName: node
+  linkType: hard
+
 "@alicloud/tea-typescript@npm:^1, @alicloud/tea-typescript@npm:^1.5.1, @alicloud/tea-typescript@npm:^1.5.3, @alicloud/tea-typescript@npm:^1.7.1":
   version: 1.8.0
   resolution: "@alicloud/tea-typescript@npm:1.8.0"
@@ -114,6 +126,16 @@ __metadata:
     "@alicloud/tea-typescript": ^1.5.1
     kitx: ^2.0.0
   checksum: 29c01e87c5387d8bdb39a0cd68823849b5b44bf01693d687b0e07e9021c174a702d595c4d2f6b9a049e743715c6b1cf60abeb04a55043d4f0634fd61bcf58326
+  languageName: node
+  linkType: hard
+
+"@alicloud/tea-util@npm:^1.4.7":
+  version: 1.4.7
+  resolution: "@alicloud/tea-util@npm:1.4.7"
+  dependencies:
+    "@alicloud/tea-typescript": ^1.5.1
+    kitx: ^2.0.0
+  checksum: 57d689356e6d40ca03f99ca67cd3526eec6e44641ff66bf2f8494964bc7a498a380a10738144ab701e560f23e37c27a0e35f91463c7e3141dc7e787751276efd
   languageName: node
   linkType: hard
 
