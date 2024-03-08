@@ -7,7 +7,10 @@ import commander from 'commander'
 import process from 'process'
 import { createObjectCsvWriter } from 'csv-writer'
 import path from 'path'
-import { wait } from '@cloud-carbon-footprint/common'
+import {
+  Logger,
+  wait,
+} from '@cloud-carbon-footprint/common'
 import { AzureCredentialsProvider } from '@cloud-carbon-footprint/azure'
 import { PagedAsyncIterableIterator } from '@azure/core-paging'
 import {
@@ -116,6 +119,9 @@ async function getConsumptionUsageDetails(startDate: Date, endDate: Date) {
         new Date(consumptionRow.properties.date) <= endDate,
     )
     .map((consumptionRow: any) => {
+      new Logger('InputRows').debug(
+        `computing Input rows.`,
+      )
       if (consumptionRow.kind === 'modern') {
         return {
           region: consumptionRow.properties.resourceLocation,

@@ -87,7 +87,7 @@ export const AZURE_REGIONS = {
   },
   EU_WEST: {
     name: 'westeurope',
-    options: ['westeurope', 'WESTEUROPE', 'EU West', 'EuropeWest'],
+    options: ['westeurope', 'WESTEUROPE', 'EU West', 'EuropeWest', 'europe'],
   },
   EU_FRANCE_CENTRAL: { name: 'francecentral', options: ['francecentral'] },
   EU_FRANCE_SOUTH: { name: 'francesouth', options: ['francesouth'] },
@@ -103,7 +103,7 @@ export const AZURE_REGIONS = {
     options: ['switzerlandwest'],
   },
   UK_SOUTH: { name: 'uksouth', options: ['uksouth', 'UKSOUTH', 'UK South'] },
-  UK_WEST: { name: 'ukwest', options: ['ukwest'] },
+  UK_WEST: { name: 'ukwest', options: ['ukwest', 'UKWEST'] },
   EU_GERMANY: { name: 'germany', options: ['germany'] },
   EU_GERMANY_NORTH: { name: 'germanynorth', options: ['germanynorth'] },
   EU_GERMANY_WESTCENTRAL: {

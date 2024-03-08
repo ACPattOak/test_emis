@@ -120,9 +120,11 @@ export default class App {
         grouping,
         accounts,
       )
+
       // appLogger.info(`here are the estimations:
-      // ${JSON.stringify(estimates, null, 2)}
+      // ${JSON.stringify(estimates[0], null, 2)}
       // `)
+      
       AzureEstimatesByRegion.push(estimates)
       appLogger.info('Finished Azure Estimations')
     }
@@ -139,7 +141,6 @@ export default class App {
       AliEstimates.push(estimates)
       appLogger.info('Finished Ali Cloud Estimations')
     }
-
     return reduceByTimestamp(
       AWSEstimatesByRegion.flat()
         .flat()

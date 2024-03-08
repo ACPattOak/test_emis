@@ -12,6 +12,8 @@ import {
 } from './VirtualMachineTypes'
 import { AZURE_REGIONS } from './AzureRegions'
 import { UsageDetailResult } from './ConsumptionTypes'
+import { LegacyUsageDetail, ModernUsageDetail } from '@azure/arm-consumption'
+
 import { configLoader, Logger } from '@cloud-carbon-footprint/common'
 
 const RESOURCE_GROUP_TAG_NAME = 'resourceGroup'
@@ -109,7 +111,7 @@ const getConsumptionDetails = (usageDetail: UsageDetailResult) => {
     region: usageDetail.resourceLocation,
   }
   const consumptionDetailRowlogger = new Logger('ConsumptionDetailRow')
-
+  
   if (usageDetail.kind === 'modern') {
     try {
       const details = {
@@ -122,11 +124,11 @@ const getConsumptionDetails = (usageDetail: UsageDetailResult) => {
       };
       return details
     } catch (e) {
-      consumptionDetailRowlogger.error("Getting consumption details for modern row failed: ", e);
+      (consumptionDetailRowlogger as any).error("Getting consumption details for modern row failed: ", e); // TODO: Fix logger typing
       return null
     }
   } 
-  else {
+  else  {
     try {
       const details = {
         ...consumptionDetails,
@@ -138,9 +140,20 @@ const getConsumptionDetails = (usageDetail: UsageDetailResult) => {
       };
       return details
     } catch (e) {
-      consumptionDetailRowlogger.error("Getting consumption details for row failed: ", e);
+      try {
+        const details = {
+          ...consumptionDetails,
+          accountId: usageDetail.meterId, // fix usagedetail typing!
+          usageType: (usageDetail as any).meterName,
+          usageUnit: (usageDetail as any).unitOfMeasure,
+          serviceName: (usageDetail as any).meterCategory,
+          cost: (usageDetail as any).costInUSD,
+        };
+        return details
+      } catch (e) {
+      (consumptionDetailRowlogger as any).error("Getting consumption details for legacy row failed: ", e); // TODO: Fix logger typing
       return null
-
+      }
     }
-  }
+  } 
 }

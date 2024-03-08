@@ -82,8 +82,18 @@ import {
 } from '../domain'
 import { AZURE_MAPPED_REGIONS_TO_ELECTRICITY_MAPS_ZONES } from './AzureRegions'
 
-const fs = require('fs').promises;
 const path = require('path');
+
+import * as fs from 'fs';
+
+import { writeFile } from 'fs/promises';
+
+import csv from 'csvtojson';
+
+import { parse } from 'json2csv';
+
+import { promisify } from 'util';
+
 
 export default class ConsumptionManagementService {
   private readonly consumptionManagementLogger: Logger
@@ -107,16 +117,35 @@ export default class ConsumptionManagementService {
       'x-ms-ratelimit-microsoft.consumption-tenant-retry-after'
   }
 
-  public async cacheUsageRows(usageRows, startDate, endDate, subscriptionId) {
-    // Create a filename that incorporates startDate, endDate, and subscriptionId
-    const fileName = `usageRowsCache_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}_${subscriptionId}.json`;
-    const filePath = path.join(__dirname, fileName);
   
+  async cacheUsageRows(usageRows, startDate: Date, endDate: Date, subscriptionId: string) {
+    console.debug(`Caching ${usageRows.length} rows for subscription ${subscriptionId}`);
+    const formattedStartDate = startDate.toISOString().split('T')[0];
+    const formattedEndDate = endDate.toISOString().split('T')[0];
+    const fileName = `usageRowsCache_${formattedStartDate}_${formattedEndDate}_${subscriptionId}.json`;
+    const filePath = path.join(__dirname, fileName);
+
     try {
-      await fs.writeFile(filePath, JSON.stringify(usageRows, null, 2), 'utf8');
+      await writeFile(filePath, JSON.stringify(usageRows, null, 2), 'utf8');
       console.log('Data cached successfully.');
     } catch (error) {
       console.error('Error caching data:', error);
+    }
+  }
+
+  async cacheUsageRowsToCSV(usageRows: any[], startDate: Date, endDate: Date, subscriptionId: string) {
+    const formattedStartDate = startDate.toISOString().split('T')[0];
+    const formattedEndDate = endDate.toISOString().split('T')[0];
+    const fileName = `usageRowsCache_${formattedStartDate}_${formattedEndDate}_${subscriptionId}.csv`;
+    const filePath = path.join(__dirname, fileName);
+
+    try {
+      const csvData = parse(usageRows);
+      console.log('Caching data to: ', filePath);
+      await writeFile(filePath, csvData, 'utf8');
+      console.log(`${usageRows.length} rows cached to CSV successfully.`);
+    } catch (error) {
+      console.error('Error caching data to CSV:', error);
     }
   }
   
@@ -125,47 +154,119 @@ export default class ConsumptionManagementService {
     const filePath = path.join(__dirname, fileName);
   
     try {
-      const data = await fs.readFile(filePath, 'utf8');
-      return JSON.parse(data);
+      const data = await fs.promises.readFile(filePath, 'utf8');
+      const jsonArray = JSON.parse(data)
+      console.debug(`retrieved ${jsonArray.length} cached rows for ${subscriptionId} `);
+      return jsonArray;
     } catch (error) {
       // If the file does not exist or there is any other error, assume the cache is invalid
-      console.error('Cache is invalid or error reading data from cache:', filePath);
+      console.error('Cache is invalid or error reading data from cache:', fileName);
       return null;
     }
   }
+
+  async getUsageRowsFromCSV(startDate: Date, endDate: Date, subscriptionId: string): Promise<any[]> {
+    // Format startDate and endDate to YYYY-MM-DD for file naming consistency
+    const formattedStartDate = startDate.toISOString().split('T')[0];
+    const formattedEndDate = endDate.toISOString().split('T')[0];
+    
+    // Construct the CSV file name based on the given parameters
+    const fileName = `usageRowsCache_${formattedStartDate}_${formattedEndDate}_${subscriptionId}.csv`;
+    const filePath = path.join(__dirname, fileName);
+  
+    // Check if the file exists before attempting to read
+    if (!fs.existsSync(filePath)) {
+      console.error('CSV file does not exist:', fileName);
+      return []; // or handle the error as appropriate
+    }
+  
+    try {
+      // Use csvtojson to convert CSV file to JSON object
+      const jsonArray = await csv().fromFile(filePath);
+      console.debug(`retrieved ${jsonArray.length} cached rows for ${subscriptionId} `);
+      return jsonArray;
+    } catch (error) {
+      console.error('Error reading data from CSV:', error);
+      return []; // or throw the error, based on how you want to handle this
+    }
+  }
+
+  convertKeysToNumbers = (array: any[], keysToConvert: string[]): any[] => {
+    return array.map(obj => {
+      const newObj = { ...obj };
+      keysToConvert.forEach(key => {
+        if (newObj[key] !== undefined && newObj[key] !== null && !isNaN(Number(newObj[key]))) {
+          newObj[key] = Number(newObj[key]);
+        }
+      });
+      return newObj;
+    });
+  };
 
   public async getEstimates(
     startDate: Date,
     endDate: Date,
     grouping: GroupBy,
   ): Promise<EstimationResult[]> {
-    let usageRows = await this.getUsageRowsFromCache(startDate, endDate, this.consumptionManagementClient.subscriptionId);
+    // let usageRows = await this.getUsageRowsFromCache(startDate, endDate, this.consumptionManagementClient.subscriptionId);
+     let usageRows = await this.getUsageRowsFromCSV(startDate, endDate, this.consumptionManagementClient.subscriptionId);
+    // await this.cacheUsageRows(usageRows, startDate, endDate, "csv_" + this.consumptionManagementClient.subscriptionId);
 
-    if (!usageRows) {
-      usageRows = await this.getConsumptionUsageDetails(startDate, endDate);
-      await this.cacheUsageRows(usageRows, startDate, endDate, this.consumptionManagementClient.subscriptionId);
-    }
+    // We have to convert a bunch of fields back to numbers because 'CSVifying' them has turned them to strings.
+    usageRows = this.convertKeysToNumbers(usageRows, [
+      "usageAmount"
+    , "cost"
+    , "costInBillingCurrency"
+    , "quantity"
+    , "effectivePrice"
+    , "costInUSD"
+    , "unitPrice"
+    , "costInPricingCurrency"
+    , "exchangeRate"
+    , "exchangeRatePricingToBilling"
+    , "paygCostInUSD"
+    , "payGPrice"
+  ])
+ 
+  //  if (!usageRows) {
+  //    usageRows = await this.getConsumptionUsageDetails(startDate, endDate);
+  //     await this.cacheUsageRows(usageRows, startDate, endDate, this.consumptionManagementClient.subscriptionId);
+  //  }
     // this bit logs all the usage data.
-    // this.consumptionManagementLogger.debug(
-    //   `usage info looks like:
-    //   ${JSON.stringify(usageRows, null, 2)}
-    //   `,
-    // )
+
+    this.consumptionManagementLogger.debug(
+      `usage info looks like:
+      ${JSON.stringify(usageRows[0], null, 2)}
+      `,
+    )
+    
     const results: MutableEstimationResult[] = []
     const unknownRows: ConsumptionDetailRow[] = []
 
+    // this.consumptionManagementLogger.debug(
+    //   `First row's date is ${new Date(usageRows[0].date)}, which is between ${startDate} and ${endDate}`
+    // )
+// When you do the date comparison like this is treats your start date as 1AM on that date if it's in britih summertime :cry:
     const filteredUsageRowsByDate = usageRows.filter(
       (consumptionRow) =>
-        new Date(consumptionRow.date) >= startDate &&
-        new Date(consumptionRow.date) <= endDate,
+        new Date(consumptionRow.date).setHours(0, 0, 0, 0) >= startDate.setHours(0, 0, 0, 0) && 
+        new Date(consumptionRow.date).setHours(0, 0, 0, 0) <= endDate.setHours(0, 0, 0, 0),
+
+    )
+    this.consumptionManagementLogger.debug(
+      `Getting emissions factors for ${filteredUsageRowsByDate.length}\
+ rows of consumption data from subscription ${this.consumptionManagementClient.subscriptionId} between ${startDate} and ${endDate}`
     )
 
     for (const consumptionRow of filteredUsageRowsByDate) {
       const consumptionDetailRow: ConsumptionDetailRow =
         new ConsumptionDetailRow(consumptionRow)
-
       this.updateTimestampByGrouping(grouping, consumptionDetailRow)
-
+   
+      // this.consumptionManagementLogger.debug(
+      //     `Current row is: ${JSON.stringify(consumptionDetailRow)}`
+      //   )
+      
       const emissionsFactors: CloudConstantsEmissionsFactors =
         await getEmissionsFactors(
           consumptionDetailRow.region,
@@ -174,12 +275,17 @@ export default class ConsumptionManagementService {
           AZURE_MAPPED_REGIONS_TO_ELECTRICITY_MAPS_ZONES,
           this.consumptionManagementLogger,
         )
+      
 
       const footprintEstimate = this.getFootprintEstimateFromUsageRow(
         consumptionDetailRow,
         unknownRows,
         emissionsFactors,
       )
+      // // This returns sometimes answers and sometimes nothing. Looks like {"timestamp":"2024-03-03T00:00:00.000Z","kilowattHours":0.0000817979904,"co2e":2.278892012544e-8,"usesAverageCPUConstant":true}
+      // this.consumptionManagementLogger.debug(
+      //   `Footprint estimate is: ${JSON.stringify(footprintEstimate)}`
+      // )
 
       if (footprintEstimate) {
         appendOrAccumulateEstimatesByDay(
@@ -214,7 +320,9 @@ export default class ConsumptionManagementService {
   ): Promise<LookupTableOutput[]> {
     const result: LookupTableOutput[] = []
     const unknownRows: ConsumptionDetailRow[] = []
-
+    new Logger('EstimatesFromInputData').debug(
+      `Getting Estaimtes from input data.`,
+    )
     for (const inputDataRow of inputData) {
       const usageRow = {
         id: '',
@@ -289,6 +397,7 @@ export default class ConsumptionManagementService {
       if (this.isUnknownUsage(consumptionDetailRow)) {
         unknownRows.push(consumptionDetailRow)
       } else {
+        // console.debug(`Getting estimate by pricing for ${JSON.stringify(consumptionDetailRow.serviceName)} on ${JSON.stringify(consumptionDetailRow.timestamp)}`)
         return this.getEstimateByPricingUnit(
           consumptionDetailRow,
           emissionsFactors,

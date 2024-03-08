@@ -207,15 +207,17 @@ export const appendOrAccumulateEstimatesByDay = (
       })
 
     if (estimateFoundWithSameRegionAndServiceAccountAndTags) {
+      console.log(`This serviceEstimate is: ${JSON.stringify(serviceEstimate)}`)
       estimateFoundWithSameRegionAndServiceAccountAndTags.kilowattHours +=
         serviceEstimate.kilowattHours
 
       estimateFoundWithSameRegionAndServiceAccountAndTags.co2e +=
         serviceEstimate.co2e
 
+        // WHY DOES IT NOT CARE THAT .cost IS NULL?? 
       estimateFoundWithSameRegionAndServiceAccountAndTags.cost +=
         serviceEstimate.cost
-
+      
       if (serviceEstimate.usesAverageCPUConstant) {
         estimateFoundWithSameRegionAndServiceAccountAndTags.usesAverageCPUConstant =
           estimateFoundWithSameRegionAndServiceAccountAndTags.usesAverageCPUConstant ||

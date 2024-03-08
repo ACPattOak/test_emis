@@ -107,12 +107,18 @@ export default class AzureAccount extends CloudProviderAccount {
       `Fetching Azure consumption data with ${AZURE.SUBSCRIPTION_CHUNKS} chunk(s)`,
     )
 
+
+
     const estimationResults = []
     for (const requests of chunkedRequests) {
       estimationResults.push(
         await Promise.all(requests.map(async (request) => request())),
       )
     }
+    // this is the object for you compute the cost - looks like {"cloudProvider":"AZURE","kilowattHours":0.27539552779908677,"co2e":0.00006196399375479452,"usesAverageCPUConstant":true,"serviceName":"Virtual Machines","accountId":"11ba491e-66d7-41d4-bd4b-3e844879c0fd","accountName":"EMISHealthAnalyticsGatekeeper","region":"uksouth","tags":{}}
+    // this.logger.debug(
+    //   `First Chunked Request entry is ${JSON.stringify(estimationResults[0][4][0].serviceEstimates[0])}`
+    // )
 
     return R.flatten(estimationResults)
   }

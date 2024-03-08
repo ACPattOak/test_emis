@@ -281,4 +281,4 @@ packages/create-app/ccf-app
 .node-version
 
 # cached usage data from the API
-**/usageRowsCache*.json
+**/usageRowsCache*

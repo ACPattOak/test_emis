@@ -21,6 +21,8 @@ export const getEmissionsFactors = async (
   mappedRegionsToElectricityMapZones: mappedRegionsToElectricityMapZones,
   logger: Logger,
 ): Promise<CloudConstantsEmissionsFactors> => {
+
+  //logger.info(`the emissions factors are ${JSON.stringify(emissionsFactors)}`)
   const electricityMapsToken = configLoader().ELECTRICITY_MAPS_TOKEN
 
   const electricityMapsZone: string = mappedRegionsToElectricityMapZones[region]
