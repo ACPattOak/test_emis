@@ -207,7 +207,7 @@ export const appendOrAccumulateEstimatesByDay = (
       })
 
     if (estimateFoundWithSameRegionAndServiceAccountAndTags) {
-      console.log(`This serviceEstimate is: ${JSON.stringify(serviceEstimate)}`)
+      // console.log(`This billing data row is: ${JSON.stringify(rowData)}`)
       estimateFoundWithSameRegionAndServiceAccountAndTags.kilowattHours +=
         serviceEstimate.kilowattHours
 

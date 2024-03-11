@@ -147,7 +147,7 @@ const getConsumptionDetails = (usageDetail: UsageDetailResult) => {
           usageType: (usageDetail as any).meterName,
           usageUnit: (usageDetail as any).unitOfMeasure,
           serviceName: (usageDetail as any).meterCategory,
-          cost: (usageDetail as any).costInUSD,
+          cost: (usageDetail as any).costInUsd,
         };
         return details
       } catch (e) {

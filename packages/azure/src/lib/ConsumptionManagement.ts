@@ -220,6 +220,7 @@ export default class ConsumptionManagementService {
     , "quantity"
     , "effectivePrice"
     , "costInUSD"
+    , "costInUsd"
     , "unitPrice"
     , "costInPricingCurrency"
     , "exchangeRate"
@@ -259,12 +260,23 @@ export default class ConsumptionManagementService {
     )
 
     for (const consumptionRow of filteredUsageRowsByDate) {
+      // this.consumptionManagementLogger.debug(
+      //   `Current consumption row is: ${JSON.stringify(consumptionRow)}`
+      // )
       const consumptionDetailRow: ConsumptionDetailRow =
         new ConsumptionDetailRow(consumptionRow)
+
+       // // looks like this for emis: {"cloudProvider":"AZURE","accountName":"nwis_mhol_emismobile_prod","timestamp":"2023-08-31T00:00:00.000Z","usageAmount":3.2185,"region":"ukwest","accountId":"12da282f-7e96-49e2-983a-9a65da2a4866","usageType":"Read Operations","usageUnit":"10K","serviceName":"Storage","seriesName":"","vCpuHours":3.2185,"gpuHours":3.2185,"tags":{}}
+      //  this.consumptionManagementLogger.debug(
+      //   `Current condumtpion detail row is: ${JSON.stringify(consumptionDetailRow)}`
+      // )
+            
       this.updateTimestampByGrouping(grouping, consumptionDetailRow)
    
+
+       // // looks like this for emis: {"cloudProvider":"AZURE","accountName":"nwis_mhol_emismobile_prod","timestamp":"2023-08-31T00:00:00.000Z","usageAmount":3.2185,"region":"ukwest","accountId":"12da282f-7e96-49e2-983a-9a65da2a4866","usageType":"Read Operations","usageUnit":"10K","serviceName":"Storage","seriesName":"","vCpuHours":3.2185,"gpuHours":3.2185,"tags":{}}
       // this.consumptionManagementLogger.debug(
-      //     `Current row is: ${JSON.stringify(consumptionDetailRow)}`
+      //     `Current condumtpion detail row is: ${JSON.stringify(consumptionDetailRow)}`
       //   )
       
       const emissionsFactors: CloudConstantsEmissionsFactors =
