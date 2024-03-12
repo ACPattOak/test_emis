@@ -21,9 +21,10 @@ const ENERGY_ESTIMATION_FORMULA = (
   replicationFactor = 1,
   averageWatts?: number,
 ) => {
-  const calculatedAverageWatts = averageWatts
-    ? averageWatts
-    : minWatts + (averageCPUUtilization / 100) * (maxWatts - minWatts)
+  const calculatedAverageWatts = 360/64
+  // averageWatts
+  //   ? averageWatts
+  //   : minWatts + (averageCPUUtilization / 100) * (maxWatts - minWatts)
   return (
     (calculatedAverageWatts *
       virtualCPUHours *
