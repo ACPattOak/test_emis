@@ -55,5 +55,9 @@
     "release": "changeset version && yarn install",
     "postinstall": "husky install",
     "version": "yarn changeset version && yarn install --no-immutable"
+  },
+  "dependencies": {
+    "csv-parser": "^3.0.0",
+    "json2csv": "^6.0.0-alpha.2"
   }
 }

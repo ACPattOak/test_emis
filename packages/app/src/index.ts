@@ -3,6 +3,7 @@
  */
 
 export { default as App } from './App'
+export { cache } from './Cache'
 export {
   createValidFootprintRequest,
   createValidRecommendationsRequest,

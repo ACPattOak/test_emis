@@ -71,10 +71,11 @@ export default async function cli(argv: string[] = process.argv) {
   if (configLoader().CACHE_MODE === 'MONGODB') {
     await MongoDbCacheManager.createDbConnection()
   }
-
+  console.log(`First Estimation request: ${JSON.stringify(estimationRequest)}`)
   const { table, colWidths } = await new App()
     .getCostAndEstimates(estimationRequest)
     .then((estimations: EstimationResult[]) => {
+      console.log(`First Estimation and first service estimate cost:  ${JSON.stringify(estimations[0].serviceEstimates[0].cost)}`)
       if (groupBy === 'service') {
         return EmissionsByServiceTable(estimations)
       }

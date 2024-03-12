@@ -32,6 +32,7 @@ export default function EmissionsByServiceTable(
       .flat(),
   )
   const grandTotals: Totals = initialTotals(serviceNames)
+  console.debug(`first service estimate from first estimation result is ${JSON.stringify(estimationResults[0].serviceEstimates[0], null, 2)}`)
 
   estimationResults.forEach((estimationResult) => {
     estimationResult.serviceEstimates.forEach((serviceEstimate) => {
@@ -53,8 +54,11 @@ export default function EmissionsByServiceTable(
       grandTotals['total'].cost += serviceEstimate.cost
     })
   })
+  console.debug(`First grand total after adding is ${JSON.stringify(grandTotals[0], null, 2)}`)
+
 
   Object.entries(grandTotals).forEach(([serviceName, serviceData]) => {
+    console.debug(`Cost for ${serviceName} is ${serviceData.cost}`)
     table.push([
       displayServiceName(serviceName),
       displayWattHours(serviceData.kilowattHours),

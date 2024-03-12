@@ -12,6 +12,8 @@ import {
 } from './VirtualMachineTypes'
 import { AZURE_REGIONS } from './AzureRegions'
 import { UsageDetailResult } from './ConsumptionTypes'
+import { LegacyUsageDetail, ModernUsageDetail } from '@azure/arm-consumption'
+
 import { configLoader, Logger } from '@cloud-carbon-footprint/common'
 
 const RESOURCE_GROUP_TAG_NAME = 'resourceGroup'
@@ -108,24 +110,50 @@ const getConsumptionDetails = (usageDetail: UsageDetailResult) => {
     usageAmount: usageDetail.quantity,
     region: usageDetail.resourceLocation,
   }
-
+  const consumptionDetailRowlogger = new Logger('ConsumptionDetailRow')
+  
   if (usageDetail.kind === 'modern') {
-    return {
-      ...consumptionDetails,
-      accountId: usageDetail.subscriptionGuid,
-      usageType: usageDetail.meterName,
-      usageUnit: usageDetail.unitOfMeasure,
-      serviceName: usageDetail.meterCategory,
-      cost: usageDetail.costInUSD,
+    try {
+      const details = {
+        ...consumptionDetails,
+        accountId: usageDetail.subscriptionGuid,
+        usageType: usageDetail.meterName,
+        usageUnit: usageDetail.unitOfMeasure,
+        serviceName: usageDetail.meterCategory,
+        cost: usageDetail.costInUSD,
+      };
+      return details
+    } catch (e) {
+      (consumptionDetailRowlogger as any).error("Getting consumption details for modern row failed: ", e); // TODO: Fix logger typing
+      return null
     }
-  } else {
-    return {
-      ...consumptionDetails,
-      accountId: usageDetail.id,
-      usageType: usageDetail.meterDetails.meterName,
-      usageUnit: usageDetail.meterDetails.unitOfMeasure,
-      serviceName: usageDetail.meterDetails.meterCategory,
-      cost: usageDetail.cost,
+  } 
+  else  {
+    try {
+      const details = {
+        ...consumptionDetails,
+        accountId: usageDetail.id,
+        usageType: usageDetail.meterDetails.meterName,
+        usageUnit: usageDetail.meterDetails.unitOfMeasure,
+        serviceName: usageDetail.meterDetails.meterCategory,
+        cost: usageDetail.cost,
+      };
+      return details
+    } catch (e) {
+      try {
+        const details = {
+          ...consumptionDetails,
+          accountId: usageDetail.meterId, // fix usagedetail typing!
+          usageType: (usageDetail as any).meterName,
+          usageUnit: (usageDetail as any).unitOfMeasure,
+          serviceName: (usageDetail as any).meterCategory,
+          cost: (usageDetail as any).costInUsd,
+        };
+        return details
+      } catch (e) {
+      (consumptionDetailRowlogger as any).error("Getting consumption details for legacy row failed: ", e); // TODO: Fix logger typing
+      return null
+      }
     }
-  }
+  } 
 }

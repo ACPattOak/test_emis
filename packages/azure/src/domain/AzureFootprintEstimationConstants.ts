@@ -115,9 +115,9 @@ export const AZURE_CLOUD_CONSTANTS: CloudConstantsByProvider = {
       ? averageWattsForProcessors
       : AZURE_CLOUD_CONSTANTS.MAX_WATTS_AVG
   },
-  NETWORKING_COEFFICIENT: 0.001, // kWh / Gb
+  NETWORKING_COEFFICIENT: 0.0075, // kWh / Gb
   MEMORY_COEFFICIENT: 0.000392, // kWh / Gb
-  PUE_AVG: 1.185,
+  PUE_AVG: 1.3675, 
   getPUE: (): number => {
     return AZURE_CLOUD_CONSTANTS.PUE_AVG
   },
@@ -132,7 +132,7 @@ export const AZURE_CLOUD_CONSTANTS: CloudConstantsByProvider = {
     COSMOS_DB: 4,
     SQL_DB: 3,
     REDIS_CACHE: 2,
-    DEFAULT: 1,
+    DEFAULT: 3.3,
   },
   // these constants accumulate as the usage rows are mapped over
   KILOWATT_HOURS_BY_SERVICE_AND_USAGE_UNIT: {
@@ -195,9 +195,9 @@ export const AZURE_EMISSIONS_FACTORS_METRIC_TON_PER_KWH: CloudConstantsEmissions
     [AZURE_REGIONS.EU_SWITZERLAND_NORTH.name]: 0.00001152,
     [AZURE_REGIONS.EU_SWITZERLAND_WEST.name]: 0.00001152,
 
-    [AZURE_REGIONS.UK_SOUTH.name]: 0.000225,
-    [AZURE_REGIONS.UK_WEST.name]: 0.000225,
-    [AZURE_REGIONS.EU_UK.name]: 0.000225,
+    [AZURE_REGIONS.UK_SOUTH.name]: 0.000269,
+    [AZURE_REGIONS.UK_WEST.name]: 0.000269,
+    [AZURE_REGIONS.EU_UK.name]: 0.000269,
 
     [AZURE_REGIONS.EU_GERMANY.name]: 0.00033866,
     [AZURE_REGIONS.EU_GERMANY_NORTH.name]: 0.00033866,
