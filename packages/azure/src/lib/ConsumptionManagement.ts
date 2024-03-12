@@ -88,7 +88,8 @@ import * as fs from 'fs';
 
 import { writeFile } from 'fs/promises';
 
-import csv from 'csvtojson';
+//import csv from 'csvtojson';
+import csv from 'csv-parser';
 
 import { parse } from 'json2csv';
 
@@ -166,29 +167,39 @@ export default class ConsumptionManagementService {
   }
 
   async getUsageRowsFromCSV(startDate: Date, endDate: Date, subscriptionId: string): Promise<any[]> {
-    // Format startDate and endDate to YYYY-MM-DD for file naming consistency
-    const formattedStartDate = startDate.toISOString().split('T')[0];
-    const formattedEndDate = endDate.toISOString().split('T')[0];
-    
-    // Construct the CSV file name based on the given parameters
-    const fileName = `usageRowsCache_${formattedStartDate}_${formattedEndDate}_${subscriptionId}.csv`;
-    const filePath = path.join(__dirname, fileName);
+    return new Promise((resolve, reject) => {
+      const formattedStartDate = startDate.toISOString().split('T')[0];
+      const formattedEndDate = endDate.toISOString().split('T')[0];
+      
+      const fileName = `usageRowsCache_${formattedStartDate}_${formattedEndDate}_${subscriptionId}.csv`;
+      const filePath = path.join(__dirname, fileName);
   
-    // Check if the file exists before attempting to read
-    if (!fs.existsSync(filePath)) {
-      console.error('CSV file does not exist:', fileName);
-      return []; // or handle the error as appropriate
-    }
+      if (!fs.existsSync(filePath)) {
+        console.error('CSV file does not exist:', fileName);
+        return reject(new Error('CSV file does not exist')); // or resolve([]) if you prefer not to throw
+      }
   
-    try {
-      // Use csvtojson to convert CSV file to JSON object
-      const jsonArray = await csv().fromFile(filePath);
-      console.debug(`retrieved ${jsonArray.length} cached rows for ${subscriptionId} `);
-      return jsonArray;
-    } catch (error) {
-      console.error('Error reading data from CSV:', error);
-      return []; // or throw the error, based on how you want to handle this
-    }
+      const results: any[] = [];
+      let rowCount = 0; // Counter for rows processed
+  
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on('data', (data) => {
+          results.push(data);
+          rowCount++;
+          if (rowCount % 100000 === 0) {
+            console.log(`Read ${rowCount} rows from cache`);
+          }
+        })
+        .on('end', () => {
+          console.debug(`Finished processing. Total rows processed: ${rowCount}. Retrieved ${results.length} cached rows for ${subscriptionId}`);
+          resolve(results);
+        })
+        .on('error', (error) => {
+          console.error('Error reading data from CSV:', error);
+          reject(error);
+        });
+    });
   }
 
   convertKeysToNumbers = (array: any[], keysToConvert: string[]): any[] => {
@@ -259,7 +270,14 @@ export default class ConsumptionManagementService {
  rows of consumption data from subscription ${this.consumptionManagementClient.subscriptionId} between ${startDate} and ${endDate}`
     )
 
+    let rowCount = 0; // Counter for rows processed
+
     for (const consumptionRow of filteredUsageRowsByDate) {
+
+      if (rowCount % 100000 === 0) {
+        console.log(`Processed ${rowCount} rows of consumption data`);
+      }
+      rowCount++;
       // this.consumptionManagementLogger.debug(
       //   `Current consumption row is: ${JSON.stringify(consumptionRow)}`
       // )
